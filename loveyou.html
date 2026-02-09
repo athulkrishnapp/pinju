@@ -40,7 +40,7 @@
         h2 {
             color: #d63384;
             margin: 0;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
             background: rgba(255,255,255,0.6);
             display: inline-block;
@@ -55,6 +55,7 @@
             color: #fff;
             text-shadow: 2px 2px 0px #ff4d6d;
             margin-top: 10px;
+            transition: color 0.2s;
         }
 
         /* The Basket */
@@ -67,14 +68,28 @@
             z-index: 5;
             cursor: grab;
             user-select: none;
+            transition: transform 0.1s;
         }
 
-        /* Falling Hearts */
-        .falling-heart {
+        /* Falling Items */
+        .falling-item {
             position: absolute;
             font-size: 2.5rem;
             top: -50px;
             user-select: none;
+        }
+
+        /* Red Flash Animation for penalty */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake-effect {
+            animation: shake 0.3s;
         }
 
         /* --- WIN SCREEN --- */
@@ -118,25 +133,27 @@
             width: 90%;
             max-width: 500px;
             background: #fff0f3;
-            padding: 20px;
+            padding: 25px;
             border-radius: 15px;
             border: 2px dashed #ffccd5;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             margin-bottom: 20px;
+            text-align: left; /* Better for reading */
         }
 
         .title {
             font-family: 'Dancing Script', cursive;
             font-size: 2.2rem;
             color: #e01e37;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            text-align: center;
         }
 
         .message {
             font-size: 1rem;
             color: #555;
             line-height: 1.6;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .highlight {
@@ -147,11 +164,11 @@
         .signature {
             font-weight: 600;
             color: #333;
-            margin-top: 10px;
             font-size: 1.1rem;
+            text-align: right; /* Standard signature alignment */
+            margin-right: 20px; /* Moved slightly left from edge */
         }
 
-        /* Music Control Button */
         #music-btn {
             background: #ff4b6a;
             color: white;
@@ -180,7 +197,7 @@
         @media (max-width: 600px) {
             #basket { font-size: 3.5rem; bottom: 10px; }
             h2 { font-size: 1rem; }
-            .falling-heart { font-size: 2rem; }
+            .falling-item { font-size: 2rem; }
             .love-letter { padding: 15px; }
             .title { font-size: 2rem; }
         }
@@ -195,7 +212,7 @@
 
     <div id="game-layer">
         <div id="ui-bar">
-            <h2>Catch 10 Hearts for a Surprise!</h2>
+            <h2>Catch 10 Hearts (Avoid Broken Ones!)</h2>
             <div id="score-display">0 / 10</div>
         </div>
         <div id="basket">🧺</div>
@@ -226,14 +243,14 @@
         // --- CONFIG ---
         const targetScore = 10;
         const heartSpeed = 4; 
-        const spawnRate = 800; 
+        const spawnRate = 700; 
 
-        // --- VARS ---
+        // --- VARIABLES ---
         let score = 0;
         let gameRunning = true;
         let basketX = window.innerWidth / 2;
         let isPlaying = false;
-        let audioUnlocked = false; // Track if we have unlocked audio
+        let audioUnlocked = false; 
         
         // --- ELEMENTS ---
         const basket = document.getElementById('basket');
@@ -245,31 +262,22 @@
         const btnText = document.getElementById('btn-text');
         const icon = document.getElementById('icon');
 
-        // --- AUDIO UNLOCKER (CRITICAL FIX) ---
-        // Browsers block audio until a user taps. 
-        // We use the first game tap to silently play/pause the audio.
+        // --- AUDIO UNLOCKER ---
         function unlockAudio() {
             if (audioUnlocked) return;
-            
-            // Play silent, then pause immediately
             music.volume = 0; 
             music.play().then(() => {
                 music.pause();
                 music.currentTime = 0;
-                music.volume = 1; // Restore volume for later
+                music.volume = 1;
                 audioUnlocked = true;
-            }).catch(e => {
-                console.log("Audio unlock failed (will try again next tap)");
-            });
+            }).catch(e => { console.log("Unlock failed"); });
             
-            // Remove listeners once unlocked
             if(audioUnlocked) {
                 document.body.removeEventListener('touchstart', unlockAudio);
                 document.body.removeEventListener('click', unlockAudio);
             }
         }
-
-        // Listen for ANY first interaction
         document.body.addEventListener('touchstart', unlockAudio, { passive: false });
         document.body.addEventListener('click', unlockAudio);
         document.body.addEventListener('mousemove', unlockAudio);
@@ -294,82 +302,98 @@
         }, { passive: false });
 
         // --- GAME LOOP ---
-        function createHeart() {
+        function createItem() {
             if (!gameRunning) return;
 
-            const heart = document.createElement('div');
-            heart.classList.add('falling-heart');
-            heart.innerHTML = '❤️';
-            const startX = Math.random() * (window.innerWidth - 40) + 20;
-            heart.style.left = startX + 'px';
-            gameLayer.appendChild(heart);
+            const item = document.createElement('div');
+            item.classList.add('falling-item');
+            
+            // Randomly decide if Heart or Broken Heart
+            // 30% chance for Broken Heart
+            const isBroken = Math.random() < 0.3;
+            
+            if (isBroken) {
+                item.innerHTML = '💔';
+                item.dataset.type = 'broken';
+            } else {
+                item.innerHTML = '❤️';
+                item.dataset.type = 'heart';
+            }
 
-            let heartY = -50;
+            const startX = Math.random() * (window.innerWidth - 40) + 20;
+            item.style.left = startX + 'px';
+            gameLayer.appendChild(item);
+
+            let itemY = -50;
 
             function fall() {
                 if (!gameRunning) {
-                    heart.remove();
+                    item.remove();
                     return;
                 }
-                heartY += heartSpeed;
-                heart.style.top = heartY + 'px';
+                itemY += heartSpeed;
+                item.style.top = itemY + 'px';
 
                 const basketRect = basket.getBoundingClientRect();
-                const heartRect = heart.getBoundingClientRect();
+                const itemRect = item.getBoundingClientRect();
 
+                // COLLISION
                 if (
-                    heartRect.bottom >= basketRect.top + 20 &&
-                    heartRect.right >= basketRect.left &&
-                    heartRect.left <= basketRect.right &&
-                    heartRect.top <= basketRect.bottom
+                    itemRect.bottom >= basketRect.top + 20 &&
+                    itemRect.right >= basketRect.left &&
+                    itemRect.left <= basketRect.right &&
+                    itemRect.top <= basketRect.bottom
                 ) {
-                    score++;
+                    // Logic based on type
+                    if (item.dataset.type === 'heart') {
+                        score++;
+                        basket.style.transform = "translateX(-50%) scale(1.2)";
+                    } else {
+                        score--;
+                        if(score < 0) score = 0; // Don't go below 0
+                        // Visual penalty
+                        gameLayer.classList.add('shake-effect');
+                        setTimeout(()=> gameLayer.classList.remove('shake-effect'), 300);
+                    }
+
                     scoreDisplay.innerText = score + " / " + targetScore;
-                    heart.remove();
-                    basket.style.transform = "translateX(-50%) scale(1.2)";
                     setTimeout(() => basket.style.transform = "translateX(-50%) scale(1)", 100);
+                    item.remove();
                     
                     if (score >= targetScore) endGame();
                     return;
                 }
 
-                if (heartY > window.innerHeight) heart.remove();
+                if (itemY > window.innerHeight) item.remove();
                 else requestAnimationFrame(fall);
             }
             requestAnimationFrame(fall);
         }
 
-        const spawner = setInterval(createHeart, spawnRate);
+        const spawner = setInterval(createItem, spawnRate);
 
-        // --- END GAME & MUSIC LOGIC ---
+        // --- END GAME ---
         function endGame() {
             gameRunning = false;
             clearInterval(spawner);
-            document.querySelectorAll('.falling-heart').forEach(h => h.remove());
+            document.querySelectorAll('.falling-item').forEach(h => h.remove());
 
             gameLayer.style.display = 'none';
             winScreen.style.display = 'flex';
 
-            // PLAY AUDIO AUTOMATICALLY
-            // Since we unlocked it during the game, this will now work!
             music.volume = 1;
             var playPromise = music.play();
-
             if (playPromise !== undefined) {
                 playPromise.then(_ => {
                     isPlaying = true;
                     updateButtonState();
-                })
-                .catch(error => {
-                    console.log("Autoplay still blocked: " + error);
-                    // Fallback just in case
+                }).catch(e => {
                     isPlaying = false;
                     updateButtonState();
                 });
             }
         }
 
-        // --- MUSIC CONTROLS ---
         function toggleMusic() {
             if (isPlaying) {
                 music.pause();
@@ -385,11 +409,11 @@
             if (isPlaying) {
                 btnText.innerText = "Pause Song";
                 icon.innerText = "⏸";
-                musicBtn.style.background = "#ff4b6a"; // Normal pink
+                musicBtn.style.background = "#ff4b6a";
             } else {
                 btnText.innerText = "Play Song";
                 icon.innerText = "▶";
-                musicBtn.style.background = "#4ecdc4"; // Greenish for 'Play'
+                musicBtn.style.background = "#4ecdc4";
             }
         }
 
