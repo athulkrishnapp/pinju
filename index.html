@@ -23,43 +23,55 @@
 
         /* --- SETUP SCREEN (For You) --- */
         #setup-screen {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 25px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             text-align: center;
             z-index: 100;
             width: 85%;
             max-width: 400px;
+            position: absolute;
         }
 
         input {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
+            padding: 12px;
+            margin: 8px 0;
             border: 2px solid #ffccd5;
             border-radius: 10px;
             font-family: 'Poppins', sans-serif;
             box-sizing: border-box;
+            outline: none;
+        }
+        
+        input:focus { border-color: #ff4b6a; }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-direction: column;
         }
 
         .action-btn {
             background: #ff4b6a;
             color: white;
             border: none;
-            padding: 12px 30px;
+            padding: 12px;
             font-size: 1rem;
-            border-radius: 50px;
+            border-radius: 10px;
             cursor: pointer;
-            margin-top: 10px;
             width: 100%;
             font-weight: 600;
+            margin-top: 5px;
         }
+        
+        .secondary-btn { background: #4ecdc4; }
 
         #share-area {
             display: none;
-            margin-top: 20px;
-            padding-top: 20px;
+            margin-top: 15px;
+            padding-top: 15px;
             border-top: 1px dashed #ccc;
         }
 
@@ -67,15 +79,16 @@
             font-size: 0.8rem;
             color: #555;
             word-break: break-all;
-            background: #eee;
+            background: #f0f0f0;
             padding: 10px;
             border-radius: 5px;
             margin-bottom: 10px;
+            user-select: all; /* Makes copying easier */
         }
 
         /* --- GAME UI (For Her) --- */
         #game-layer {
-            display: none; /* Hidden until names are found */
+            display: none; 
             position: absolute;
             top: 0;
             left: 0;
@@ -129,6 +142,7 @@
             font-size: 2.5rem;
             top: -50px;
             user-select: none;
+            z-index: 2; /* Ensures they are above background */
         }
 
         .shake-effect { animation: shake 0.3s; }
@@ -231,18 +245,21 @@
     </audio>
 
     <div id="setup-screen">
-        <h1 style="color:#ff4b6a; font-family:'Dancing Script'; margin:0;">Create a Surprise</h1>
-        <p style="color:#666; font-size:0.9rem;">Generate a personalized game for your Valentine.</p>
+        <h1 style="color:#ff4b6a; font-family:'Dancing Script'; margin:0;">Create Surprise</h1>
+        <p style="color:#666; font-size:0.9rem;">Make a game for your Valentine.</p>
         
-        <input type="text" id="input-sender" placeholder="Your Name (e.g., Kannan)">
-        <input type="text" id="input-lover" placeholder="Lover's Name (e.g., Pinju)">
+        <input type="text" id="input-sender" placeholder="Your Name (e.g. Kannan)">
+        <input type="text" id="input-lover" placeholder="Her Name (e.g. Pinju)">
         
-        <button class="action-btn" onclick="generateLink()">Create Surprise Link</button>
+        <div class="btn-group">
+            <button class="action-btn" onclick="generateLink()">1. Create Link</button>
+            <button class="action-btn secondary-btn" onclick="manualStart()">2. Play Now (Test)</button>
+        </div>
 
         <div id="share-area">
-            <p style="font-size:0.9rem; color:#333;"><b>Copy this link and send it to her:</b></p>
+            <p style="font-size:0.9rem; color:#333; margin-bottom:5px;"><b>Send this to her:</b></p>
             <div id="generated-link">...</div>
-            <button class="action-btn" style="background:#4ecdc4;" onclick="copyLink()">📋 Copy Link</button>
+            <button class="action-btn" style="background:#333;" onclick="copyLink()">📋 Copy Link</button>
         </div>
     </div>
 
@@ -266,7 +283,7 @@
                 Catching hearts is fun, but catching yours was the best moment of my life. <br><br>
                 You make my world brighter every single day.
             </div>
-            <div class="signature">Love Forever,<br>- <span id="final-sender-name">Me</span></div>
+            <div class="signature">Love Always,<br>- <span id="final-sender-name">Me</span></div>
         </div>
 
         <button id="music-btn" onclick="toggleMusic()">
@@ -275,64 +292,20 @@
     </div>
 
     <script>
-        /* --- 1. SETUP LOGIC --- */
-        const urlParams = new URLSearchParams(window.location.search);
-        const sender = urlParams.get('from');
-        const lover = urlParams.get('to');
-        const setupScreen = document.getElementById('setup-screen');
-        const gameLayer = document.getElementById('game-layer');
-
-        if (sender && lover) {
-            // IF NAMES EXIST: Hide setup, Start Game
-            setupScreen.style.display = 'none';
-            gameLayer.style.display = 'block';
-            
-            // Set Names in text
-            document.getElementById('game-lover-name').innerText = lover;
-            document.getElementById('final-lover-name').innerText = lover;
-            document.getElementById('final-sender-name').innerText = sender;
-            
-            startGame();
-        } else {
-            // IF NO NAMES: Show Setup
-            setupScreen.style.display = 'block';
-        }
-
-        function generateLink() {
-            const sName = document.getElementById('input-sender').value.trim();
-            const lName = document.getElementById('input-lover').value.trim();
-            
-            if(!sName || !lName) {
-                alert("Please enter both names!");
-                return;
-            }
-
-            // Create URL
-            const baseUrl = window.location.href.split('?')[0];
-            const finalUrl = `${baseUrl}?from=${encodeURIComponent(sName)}&to=${encodeURIComponent(lName)}`;
-            
-            // Show Share Area
-            document.getElementById('share-area').style.display = 'block';
-            document.getElementById('generated-link').innerText = finalUrl;
-        }
-
-        function copyLink() {
-            const linkText = document.getElementById('generated-link').innerText;
-            navigator.clipboard.writeText(linkText).then(() => {
-                alert("Link Copied! Now send it to " + document.getElementById('input-lover').value);
-            });
-        }
-
-        /* --- 2. GAME LOGIC --- */
-        const targetScore = 10;
-        const heartSpeed = 4;
-        const spawnRate = 700;
+        /* --- GLOBAL VARIABLES --- */
+        let spawner; // Needs to be global
         let score = 0;
         let gameRunning = false;
         let basketX = window.innerWidth / 2;
         let isPlaying = false;
         let audioUnlocked = false;
+        const targetScore = 10;
+        const heartSpeed = 5; // Slightly faster to ensure visibility
+        const spawnRate = 700;
 
+        /* --- DOM ELEMENTS --- */
+        const setupScreen = document.getElementById('setup-screen');
+        const gameLayer = document.getElementById('game-layer');
         const basket = document.getElementById('basket');
         const scoreDisplay = document.getElementById('score-display');
         const winScreen = document.getElementById('win-screen');
@@ -341,14 +314,70 @@
         const btnText = document.getElementById('btn-text');
         const icon = document.getElementById('icon');
 
+        /* --- 1. INITIALIZATION CHECK --- */
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sender = urlParams.get('from');
+            const lover = urlParams.get('to');
+
+            if (sender && lover) {
+                // If link has names, START IMMEDIATELY
+                setupGame(sender, lover);
+            }
+        };
+
+        /* --- 2. SETUP LOGIC --- */
+        function generateLink() {
+            const sName = document.getElementById('input-sender').value.trim();
+            const lName = document.getElementById('input-lover').value.trim();
+            
+            if(!sName || !lName) { alert("Please enter both names!"); return; }
+
+            const baseUrl = window.location.href.split('?')[0];
+            const finalUrl = `${baseUrl}?from=${encodeURIComponent(sName)}&to=${encodeURIComponent(lName)}`;
+            
+            document.getElementById('share-area').style.display = 'block';
+            document.getElementById('generated-link').innerText = finalUrl;
+        }
+
+        function copyLink() {
+            const linkText = document.getElementById('generated-link').innerText;
+            navigator.clipboard.writeText(linkText).then(() => {
+                alert("Link Copied! Send it to her.");
+            });
+        }
+
+        function manualStart() {
+            const sName = document.getElementById('input-sender').value.trim() || "Kannan";
+            const lName = document.getElementById('input-lover').value.trim() || "Pinju";
+            setupGame(sName, lName);
+        }
+
+        function setupGame(sender, lover) {
+            // Update Text
+            document.getElementById('game-lover-name').innerText = lover;
+            document.getElementById('final-lover-name').innerText = lover;
+            document.getElementById('final-sender-name').innerText = sender;
+
+            // Switch Screens
+            setupScreen.style.display = 'none';
+            gameLayer.style.display = 'block';
+
+            // Start Game Loop
+            startGame();
+        }
+
+        /* --- 3. GAME LOGIC --- */
         function startGame() {
             gameRunning = true;
-            // Listen for audio unlock
+            
+            // Audio Unlock Listeners
             document.body.addEventListener('touchstart', unlockAudio, { passive: false });
             document.body.addEventListener('click', unlockAudio);
             
-            // Start spawner
-            setInterval(createItem, spawnRate);
+            // Start Falling Hearts
+            if (spawner) clearInterval(spawner); // Clear any existing
+            spawner = setInterval(createItem, spawnRate);
         }
 
         function unlockAudio() {
@@ -360,13 +389,14 @@
                 music.volume = 1;
                 audioUnlocked = true;
             }).catch(e=>{});
+            
             if(audioUnlocked) {
                 document.body.removeEventListener('touchstart', unlockAudio);
                 document.body.removeEventListener('click', unlockAudio);
             }
         }
 
-        // Controls
+        // --- CONTROLS ---
         function moveBasket(x) {
             if(x < 30) x = 30;
             if(x > window.innerWidth - 30) x = window.innerWidth - 30;
@@ -378,13 +408,14 @@
             if(gameRunning) { e.preventDefault(); moveBasket(e.touches[0].clientX); }
         }, { passive: false });
 
-        // Spawner
+        // --- SPAWNER ---
         function createItem() {
             if (!gameRunning) return;
+
             const item = document.createElement('div');
             item.classList.add('falling-item');
             
-            // 30% Broken Heart
+            // 30% Chance of Broken Heart
             const isBroken = Math.random() < 0.3;
             if (isBroken) {
                 item.innerHTML = '💔';
@@ -394,30 +425,38 @@
                 item.dataset.type = 'heart';
             }
 
-            item.style.left = (Math.random() * (window.innerWidth - 40) + 20) + 'px';
+            // Random Position
+            const startX = Math.random() * (window.innerWidth - 50) + 20;
+            item.style.left = startX + 'px';
+            
             gameLayer.appendChild(item);
 
+            // Falling Animation
             let itemY = -50;
             function fall() {
                 if (!gameRunning) { item.remove(); return; }
+                
                 itemY += heartSpeed;
                 item.style.top = itemY + 'px';
                 
+                // Collision Detection
                 const bRect = basket.getBoundingClientRect();
                 const iRect = item.getBoundingClientRect();
 
                 if (iRect.bottom >= bRect.top + 20 && iRect.right >= bRect.left && 
                     iRect.left <= bRect.right && iRect.top <= bRect.bottom) {
                     
+                    // Hit!
                     if (item.dataset.type === 'heart') {
                         score++;
                         basket.style.transform = "translateX(-50%) scale(1.2)";
                     } else {
-                        score--;
-                        if(score<0) score=0;
+                        score--; // Penalty
+                        if(score < 0) score = 0;
                         gameLayer.classList.add('shake-effect');
-                        setTimeout(()=>gameLayer.classList.remove('shake-effect'),300);
+                        setTimeout(()=>gameLayer.classList.remove('shake-effect'), 300);
                     }
+                    
                     scoreDisplay.innerText = score + " / " + targetScore;
                     setTimeout(() => basket.style.transform = "translateX(-50%) scale(1)", 100);
                     item.remove();
@@ -425,15 +464,27 @@
                     if (score >= targetScore) endGame();
                     return;
                 }
-                if (itemY > window.innerHeight) item.remove();
-                else requestAnimationFrame(fall);
+
+                // Missed (out of screen)
+                if (itemY > window.innerHeight) {
+                    item.remove();
+                } else {
+                    requestAnimationFrame(fall);
+                }
             }
             requestAnimationFrame(fall);
         }
 
+        /* --- 4. END GAME --- */
         function endGame() {
             gameRunning = false;
-            document.querySelectorAll('.falling-item').forEach(h => h.remove());
+            clearInterval(spawner); // Stop spawning
+            
+            // Clean up existing items
+            const items = document.querySelectorAll('.falling-item');
+            items.forEach(i => i.remove());
+
+            // Switch Screens
             gameLayer.style.display = 'none';
             winScreen.style.display = 'flex';
             
@@ -443,6 +494,7 @@
                 isPlaying = true;
                 updateButtonState();
             }).catch(e => {
+                console.log("Auto-play blocked, waiting for click");
                 isPlaying = false;
                 updateButtonState();
             });
