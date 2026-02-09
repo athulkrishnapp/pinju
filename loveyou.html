@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>For Pinjoose ❤️</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;500;600&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            font-family: 'Poppins', sans-serif;
+            touch-action: none; 
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- GAME UI --- */
+        #game-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        #ui-bar {
+            position: absolute;
+            top: 5%;
+            width: 100%;
+            text-align: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        h2 {
+            color: #d63384;
+            margin: 0;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.6);
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 50px;
+            backdrop-filter: blur(5px);
+        }
+
+        #score-display {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+            text-shadow: 2px 2px 0px #ff4d6d;
+            margin-top: 10px;
+        }
+
+        /* The Basket */
+        #basket {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 4rem;
+            z-index: 5;
+            cursor: grab;
+            user-select: none;
+        }
+
+        /* Falling Hearts */
+        .falling-heart {
+            position: absolute;
+            font-size: 2.5rem;
+            top: -50px;
+            user-select: none;
+        }
+
+        /* --- WIN SCREEN --- */
+        #win-screen {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 20;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .gif-frame {
+            padding: 10px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(255, 77, 109, 0.2);
+            margin-bottom: 20px;
+            max-width: 90%;
+        }
+
+        .gif-frame img {
+            max-width: 100%;
+            width: 250px;
+            height: auto;
+            border-radius: 15px;
+            display: block;
+        }
+
+        .love-letter {
+            width: 90%;
+            max-width: 500px;
+            background: #fff0f3;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed #ffccd5;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.2rem;
+            color: #e01e37;
+            margin-bottom: 10px;
+        }
+
+        .message {
+            font-size: 1rem;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .highlight {
+            color: #d63384;
+            font-weight: bold;
+        }
+
+        .signature {
+            font-weight: 600;
+            color: #333;
+            margin-top: 10px;
+            font-size: 1.1rem;
+        }
+
+        /* Music Control Button */
+        #music-btn {
+            background: #ff4b6a;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 75, 106, 0.4);
+            font-family: 'Poppins', sans-serif;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #music-btn:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            #basket { font-size: 3.5rem; bottom: 10px; }
+            h2 { font-size: 1rem; }
+            .falling-heart { font-size: 2rem; }
+            .love-letter { padding: 15px; }
+            .title { font-size: 2rem; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop preload="auto">
+        <source src="song.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="game-layer">
+        <div id="ui-bar">
+            <h2>Catch 10 Hearts for a Surprise!</h2>
+            <div id="score-display">0 / 10</div>
+        </div>
+        <div id="basket">🧺</div>
+    </div>
+
+    <div id="win-screen">
+        <div class="gif-frame">
+            <img src="teddy.gif" alt="Teddy Love">
+        </div>
+
+        <div class="love-letter">
+            <div class="title">Happy Teddy Day!</div>
+            <div class="message">
+                To my dearest <span class="highlight">Pinjoose</span>, <br><br>
+                Since September 2017, you have been my world. <br>
+                Catching these hearts is easy, but catching your heart was the best thing I ever did.<br><br>
+                You are my teddy, my love, and my life.
+            </div>
+            <div class="signature">I Love You! ❤️<br>- Kannan</div>
+        </div>
+
+        <button id="music-btn" onclick="toggleMusic()">
+            <span id="icon">⏸</span> <span id="btn-text">Pause Song</span>
+        </button>
+    </div>
+
+    <script>
+        // --- CONFIG ---
+        const targetScore = 10;
+        const heartSpeed = 4; 
+        const spawnRate = 800; 
+
+        // --- VARS ---
+        let score = 0;
+        let gameRunning = true;
+        let basketX = window.innerWidth / 2;
+        let isPlaying = false;
+        let audioUnlocked = false; // Track if we have unlocked audio
+        
+        // --- ELEMENTS ---
+        const basket = document.getElementById('basket');
+        const gameLayer = document.getElementById('game-layer');
+        const scoreDisplay = document.getElementById('score-display');
+        const winScreen = document.getElementById('win-screen');
+        const music = document.getElementById('bg-music');
+        const musicBtn = document.getElementById('music-btn');
+        const btnText = document.getElementById('btn-text');
+        const icon = document.getElementById('icon');
+
+        // --- AUDIO UNLOCKER (CRITICAL FIX) ---
+        // Browsers block audio until a user taps. 
+        // We use the first game tap to silently play/pause the audio.
+        function unlockAudio() {
+            if (audioUnlocked) return;
+            
+            // Play silent, then pause immediately
+            music.volume = 0; 
+            music.play().then(() => {
+                music.pause();
+                music.currentTime = 0;
+                music.volume = 1; // Restore volume for later
+                audioUnlocked = true;
+            }).catch(e => {
+                console.log("Audio unlock failed (will try again next tap)");
+            });
+            
+            // Remove listeners once unlocked
+            if(audioUnlocked) {
+                document.body.removeEventListener('touchstart', unlockAudio);
+                document.body.removeEventListener('click', unlockAudio);
+            }
+        }
+
+        // Listen for ANY first interaction
+        document.body.addEventListener('touchstart', unlockAudio, { passive: false });
+        document.body.addEventListener('click', unlockAudio);
+        document.body.addEventListener('mousemove', unlockAudio);
+
+        // --- CONTROLS ---
+        function moveBasket(x) {
+            if(x < 30) x = 30;
+            if(x > window.innerWidth - 30) x = window.innerWidth - 30;
+            basketX = x;
+            basket.style.left = basketX + 'px';
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            if(gameRunning) moveBasket(e.clientX);
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if(gameRunning) {
+                e.preventDefault(); 
+                moveBasket(e.touches[0].clientX);
+            }
+        }, { passive: false });
+
+        // --- GAME LOOP ---
+        function createHeart() {
+            if (!gameRunning) return;
+
+            const heart = document.createElement('div');
+            heart.classList.add('falling-heart');
+            heart.innerHTML = '❤️';
+            const startX = Math.random() * (window.innerWidth - 40) + 20;
+            heart.style.left = startX + 'px';
+            gameLayer.appendChild(heart);
+
+            let heartY = -50;
+
+            function fall() {
+                if (!gameRunning) {
+                    heart.remove();
+                    return;
+                }
+                heartY += heartSpeed;
+                heart.style.top = heartY + 'px';
+
+                const basketRect = basket.getBoundingClientRect();
+                const heartRect = heart.getBoundingClientRect();
+
+                if (
+                    heartRect.bottom >= basketRect.top + 20 &&
+                    heartRect.right >= basketRect.left &&
+                    heartRect.left <= basketRect.right &&
+                    heartRect.top <= basketRect.bottom
+                ) {
+                    score++;
+                    scoreDisplay.innerText = score + " / " + targetScore;
+                    heart.remove();
+                    basket.style.transform = "translateX(-50%) scale(1.2)";
+                    setTimeout(() => basket.style.transform = "translateX(-50%) scale(1)", 100);
+                    
+                    if (score >= targetScore) endGame();
+                    return;
+                }
+
+                if (heartY > window.innerHeight) heart.remove();
+                else requestAnimationFrame(fall);
+            }
+            requestAnimationFrame(fall);
+        }
+
+        const spawner = setInterval(createHeart, spawnRate);
+
+        // --- END GAME & MUSIC LOGIC ---
+        function endGame() {
+            gameRunning = false;
+            clearInterval(spawner);
+            document.querySelectorAll('.falling-heart').forEach(h => h.remove());
+
+            gameLayer.style.display = 'none';
+            winScreen.style.display = 'flex';
+
+            // PLAY AUDIO AUTOMATICALLY
+            // Since we unlocked it during the game, this will now work!
+            music.volume = 1;
+            var playPromise = music.play();
+
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    isPlaying = true;
+                    updateButtonState();
+                })
+                .catch(error => {
+                    console.log("Autoplay still blocked: " + error);
+                    // Fallback just in case
+                    isPlaying = false;
+                    updateButtonState();
+                });
+            }
+        }
+
+        // --- MUSIC CONTROLS ---
+        function toggleMusic() {
+            if (isPlaying) {
+                music.pause();
+                isPlaying = false;
+            } else {
+                music.play();
+                isPlaying = true;
+            }
+            updateButtonState();
+        }
+
+        function updateButtonState() {
+            if (isPlaying) {
+                btnText.innerText = "Pause Song";
+                icon.innerText = "⏸";
+                musicBtn.style.background = "#ff4b6a"; // Normal pink
+            } else {
+                btnText.innerText = "Play Song";
+                icon.innerText = "▶";
+                musicBtn.style.background = "#4ecdc4"; // Greenish for 'Play'
+            }
+        }
+
+    </script>
+</body>
+</html>
