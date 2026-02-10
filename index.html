@@ -3,238 +3,298 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>A Surprise For You ❤️</title>
+    <title>Promise Vault 🔒</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600&display=swap');
+
+        :root {
+            --primary: #ff4b6a;
+            --neon: #00f3ff;
+            --glass-bg: rgba(20, 20, 25, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
 
         body {
             margin: 0;
             padding: 0;
-            overflow: hidden;
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
-            font-family: 'Poppins', sans-serif;
-            touch-action: none; 
             height: 100vh;
             width: 100vw;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #1a0b1a 0%, #000000 100%);
+            font-family: 'Poppins', sans-serif;
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
+            touch-action: none;
         }
 
-        /* --- SETUP SCREEN (For You) --- */
-        #setup-screen {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            text-align: center;
-            z-index: 100;
-            width: 85%;
-            max-width: 400px;
+        /* --- BACKGROUND --- */
+        #bg-container {
             position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bg-particle {
+            position: absolute;
+            background: var(--primary);
+            border-radius: 50%;
+            opacity: 0.4;
+            animation: float 8s infinite linear;
+        }
+
+        /* --- UI LAYERS --- */
+        .screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        /* --- 1. SETUP SCREEN --- */
+        #setup-screen {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 40px 30px;
+            border-radius: 25px;
+            text-align: center;
+            width: 85%;
+            max-width: 380px;
+            border: 1px solid rgba(255, 75, 106, 0.3);
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            animation: hudEntrance 0.8s ease-out;
+        }
+
+        .setup-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0 0 10px 0;
+            text-shadow: 0 0 10px rgba(255, 75, 106, 0.5);
         }
 
         input {
             width: 100%;
-            padding: 12px;
+            padding: 15px;
             margin: 8px 0;
-            border: 2px solid #ffccd5;
-            border-radius: 10px;
-            font-family: 'Poppins', sans-serif;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
             box-sizing: border-box;
             outline: none;
         }
-        
-        input:focus { border-color: #ff4b6a; }
 
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            flex-direction: column;
-        }
-
-        .action-btn {
-            background: #ff4b6a;
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff4b6a, #ff7b93);
             color: white;
             border: none;
-            padding: 12px;
+            border-radius: 12px;
             font-size: 1rem;
-            border-radius: 10px;
             cursor: pointer;
-            width: 100%;
             font-weight: 600;
-            margin-top: 5px;
+            margin-top: 15px;
+            box-shadow: 0 5px 20px rgba(255, 75, 106, 0.3);
+            font-family: 'Orbitron', sans-serif;
         }
-        
-        .secondary-btn { background: #4ecdc4; }
 
         #share-area {
             display: none;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px dashed #ccc;
+            margin-top: 20px;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px dashed rgba(255,255,255,0.2);
         }
-
-        #generated-link {
-            font-size: 0.8rem;
-            color: #555;
+        
+        #link-text {
             word-break: break-all;
-            background: #f0f0f0;
-            padding: 10px;
-            border-radius: 5px;
+            font-size: 0.8rem;
             margin-bottom: 10px;
-            user-select: all; /* Makes copying easier */
+            color: var(--neon);
+            font-family: monospace;
         }
 
-        /* --- GAME UI (For Her) --- */
-        #game-layer {
-            display: none; 
+        /* --- 2. SCANNER SCREEN --- */
+        #scanner-screen { display: none; }
+
+        .scan-title {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+            font-size: 1.4rem;
+            text-shadow: 0 0 10px var(--neon);
+            color: var(--neon);
+        }
+
+        .fingerprint-zone {
+            width: 120px;
+            height: 150px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 60px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background: rgba(255,255,255,0.05);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .fingerprint-zone.scanning {
+            border-color: var(--primary);
+            box-shadow: 0 0 30px var(--primary);
+        }
+
+        .fingerprint-icon { font-size: 5rem; opacity: 0.5; user-select: none; }
+
+        .scan-laser {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: var(--primary);
+            box-shadow: 0 0 15px var(--primary);
+            opacity: 0;
         }
 
-        #ui-bar {
-            position: absolute;
-            top: 5%;
-            width: 100%;
-            text-align: center;
-            z-index: 10;
-            pointer-events: none;
-        }
+        .scanning .scan-laser { opacity: 1; animation: scanDown 1.5s linear infinite; }
 
-        h2 {
-            color: #d63384;
-            margin: 0;
-            font-size: 1.1rem;
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
-            background: rgba(255,255,255,0.6);
-            display: inline-block;
-            padding: 8px 20px;
-            border-radius: 50px;
-            backdrop-filter: blur(5px);
-        }
+        .status-text { margin-top: 25px; font-size: 1rem; color: #aaa; }
 
-        #score-display {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #fff;
-            text-shadow: 2px 2px 0px #ff4d6d;
-            margin-top: 10px;
-        }
+        /* --- 3. VAULT SCREEN --- */
+        #vault-screen { display: none; }
 
-        #basket {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 4rem;
-            z-index: 5;
-            cursor: grab;
-            user-select: none;
-        }
-
-        .falling-item {
-            position: absolute;
-            font-size: 2.5rem;
-            top: -50px;
-            user-select: none;
-            z-index: 2; /* Ensures they are above background */
-        }
-
-        .shake-effect { animation: shake 0.3s; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25%, 75% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-        }
-
-        /* --- WIN SCREEN --- */
-        #win-screen {
-            display: none;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            z-index: 20;
+        .card-container {
+            width: 85%;
+            max-width: 350px;
+            min-height: 400px;
+            background: rgba(20, 20, 30, 0.6);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 75, 106, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            box-sizing: border-box;
+            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            animation: fadeIn 1s ease-in;
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .gif-frame img {
-            max-width: 100%;
-            width: 250px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(255, 77, 109, 0.2);
-            border: 4px solid white;
-        }
-
-        .love-letter {
-            width: 90%;
-            max-width: 500px;
-            background: #fff0f3;
-            padding: 25px;
-            border-radius: 15px;
-            border: 2px dashed #ffccd5;
-            margin: 20px 0;
-            text-align: left;
-        }
-
-        .title {
+        .promise-content {
             font-family: 'Dancing Script', cursive;
             font-size: 2.2rem;
-            color: #e01e37;
-            margin-bottom: 10px;
-            text-align: center;
+            line-height: 1.4;
+            color: #fff;
+            margin-bottom: 30px;
         }
 
-        .message {
-            font-size: 1rem;
-            color: #555;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .highlight {
-            color: #d63384;
-            font-weight: bold;
-            text-transform: capitalize;
-        }
-
-        .signature {
-            font-weight: 600;
-            color: #333;
-            font-size: 1.1rem;
-            text-align: right;
-            margin-right: 10px;
-            text-transform: capitalize;
-        }
-
-        #music-btn {
-            background: #ff4b6a;
+        .nav-btn {
+            background: transparent;
+            border: 2px solid var(--primary);
             color: white;
-            border: none;
-            padding: 12px 30px;
-            font-size: 1rem;
+            padding: 12px 35px;
             border-radius: 50px;
+            font-size: 1rem;
             cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* --- 4. FINAL SCREEN (Redesigned) --- */
+        #final-screen { display: none; }
+
+        .certificate-container {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 40px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 75, 106, 0.3);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            max-width: 85%;
+            width: 320px;
+            text-align: center;
+            position: relative;
+        }
+
+        .seal {
+            width: 100px;
+            height: 100px;
+            border: 3px solid #ff4b6a;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 10px;
+            justify-content: center;
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.5rem;
+            color: #ff4b6a;
+            transform: rotate(-15deg);
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-10deg);
+            background: #1a0b1a;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .final-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(255, 75, 106, 0.6);
+            margin-top: 40px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .contract-text {
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.8rem;
+            color: #ccc;
+            margin: 15px 0 5px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+
+        .names-highlight {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3rem;
+            color: var(--neon);
+            text-shadow: 0 0 15px var(--neon);
+            margin: 5px 0 25px 0;
+            line-height: 1.1;
+        }
+
+        /* Music Button */
+        #music-toggle {
+            position: absolute;
+            top: 20px; right: 20px;
+            font-size: 1.5rem;
+            background: none; border: none;
+            cursor: pointer; z-index: 100;
+            filter: drop-shadow(0 0 5px white);
+        }
+
+        /* Animations */
+        @keyframes float { 0% { transform: translateY(0); } 100% { transform: translateY(-120vh); } }
+        @keyframes scanDown { 0% { top: 0; } 50% { top: 100%; opacity: 1; } 51% { opacity: 0; } 100% { top: 0; opacity: 0; } }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes hudEntrance { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
     </style>
 </head>
@@ -244,279 +304,216 @@
         <source src="song.mp3" type="audio/mpeg">
     </audio>
 
-    <div id="setup-screen">
-        <h1 style="color:#ff4b6a; font-family:'Dancing Script'; margin:0;">Create Surprise</h1>
-        <p style="color:#666; font-size:0.9rem;">Make a game for your Valentine.</p>
-        
-        <input type="text" id="input-sender" placeholder="Your Name (e.g. Kannan)">
-        <input type="text" id="input-lover" placeholder="Her Name (e.g. Pinju)">
-        
-        <div class="btn-group">
-            <button class="action-btn" onclick="generateLink()">1. Create Link</button>
-            <button class="action-btn secondary-btn" onclick="manualStart()">2. Play Now (Test)</button>
-        </div>
+    <button id="music-toggle" onclick="toggleAudio()">🔇</button>
 
+    <div id="bg-container"></div>
+
+    <div id="setup-screen" class="screen" style="z-index: 100;">
+        <h2 class="setup-title">Promise Vault</h2>
+        <p style="color:#aaa; font-size:0.9rem; margin-bottom:20px;">Initialize Digital Contract</p>
+        
+        <input type="text" id="s-input" placeholder="Your Name">
+        <input type="text" id="r-input" placeholder="Partner's Name">
+        
+        <button class="btn" onclick="generateLink()">Create Link</button>
+        <button class="btn" style="background:transparent; border:1px solid rgba(255,255,255,0.2); box-shadow:none; font-size:0.8rem; margin-top:10px; padding:10px;" onclick="startPreview()">Test / Preview</button>
+        
         <div id="share-area">
-            <p style="font-size:0.9rem; color:#333; margin-bottom:5px;"><b>Send this to her:</b></p>
-            <div id="generated-link">...</div>
-            <button class="action-btn" style="background:#333;" onclick="copyLink()">📋 Copy Link</button>
+            <div id="link-text"></div>
+            <button class="btn" style="padding:10px; font-size:0.8rem; margin-top:5px; background: #333;" onclick="copyLink()">📋 Copy Link</button>
         </div>
     </div>
 
-    <div id="game-layer">
-        <div id="ui-bar">
-            <h2>Catch 10 Hearts for <span id="game-lover-name">Her</span>!</h2>
-            <div id="score-display">0 / 10</div>
+    <div id="scanner-screen" class="screen">
+        <div class="scan-title">IDENTITY CHECK</div>
+        <div class="fingerprint-zone" id="fp-zone" onmousedown="startScan()" ontouchstart="startScan(event)" onmouseup="stopScan()" ontouchend="stopScan()">
+            <div class="fingerprint-icon">🔒</div>
+            <div class="scan-laser"></div>
         </div>
-        <div id="basket">🧺</div>
+        <div class="status-text" id="status-msg">Hold Finger to Unlock</div>
     </div>
 
-    <div id="win-screen">
-        <div class="gif-frame">
-            <img src="teddy.gif" alt="Teddy Love">
-        </div>
+    <div id="vault-screen" class="screen">
+        <div class="card-container" id="card-box"></div>
+    </div>
 
-        <div class="love-letter">
-            <div class="title">Happy Teddy Day!</div>
-            <div class="message">
-                To my dearest <span class="highlight" id="final-lover-name">Love</span>, <br><br>
-                Catching hearts is fun, but catching yours was the best moment of my life. <br><br>
-                You make my world brighter every single day.
-            </div>
-            <div class="signature">Love Always,<br>- <span id="final-sender-name">Me</span></div>
+    <div id="final-screen" class="screen">
+        <div class="certificate-container">
+            <div class="seal">Signed</div>
+            <h1 class="final-title">Promise Sealed</h1>
+            
+            <p class="contract-text">This digital soul contract certifies that</p>
+            <div class="names-highlight" id="final-sender">Sender</div>
+            
+            <p class="contract-text">is bound by eternal love to</p>
+            <div class="names-highlight" id="final-receiver">Receiver</div>
         </div>
-
-        <button id="music-btn" onclick="toggleMusic()">
-            <span id="icon">⏸</span> <span id="btn-text">Pause Song</span>
-        </button>
     </div>
 
     <script>
-        /* --- GLOBAL VARIABLES --- */
-        let spawner; // Needs to be global
-        let score = 0;
-        let gameRunning = false;
-        let basketX = window.innerWidth / 2;
-        let isPlaying = false;
-        let audioUnlocked = false;
-        const targetScore = 10;
-        const heartSpeed = 5; // Slightly faster to ensure visibility
-        const spawnRate = 700;
+        /* PARTICLES */
+        function initParticles() {
+            const bg = document.getElementById('bg-container');
+            for(let i=0; i<30; i++) {
+                const p = document.createElement('div');
+                p.classList.add('bg-particle');
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.top = Math.random() * 100 + 'vh';
+                const size = Math.random() * 5 + 2;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.animationDuration = Math.random() * 5 + 5 + 's';
+                p.style.animationDelay = Math.random() * 5 + 's';
+                bg.appendChild(p);
+            }
+        }
+        initParticles();
 
-        /* --- DOM ELEMENTS --- */
-        const setupScreen = document.getElementById('setup-screen');
-        const gameLayer = document.getElementById('game-layer');
-        const basket = document.getElementById('basket');
-        const scoreDisplay = document.getElementById('score-display');
-        const winScreen = document.getElementById('win-screen');
-        const music = document.getElementById('bg-music');
-        const musicBtn = document.getElementById('music-btn');
-        const btnText = document.getElementById('btn-text');
-        const icon = document.getElementById('icon');
+        /* STATE */
+        let senderName = "Sender";
+        let receiverName = "Receiver";
+        let scanInterval;
+        let progress = 0;
+        let cardIndex = 0;
+        let isMusicPlaying = false;
 
-        /* --- 1. INITIALIZATION CHECK --- */
+        const promises = [
+            "I promise to support your dreams, no matter how big they are.",
+            "I promise to be your peace when the world gets too loud.",
+            "I promise to always listen, understand, and never judge.",
+            "I promise to love you a little more every single day.",
+            "I promise to stay by your side, forever and always."
+        ];
+
+        /* SETUP */
         window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const sender = urlParams.get('from');
-            const lover = urlParams.get('to');
-
-            if (sender && lover) {
-                // If link has names, START IMMEDIATELY
-                setupGame(sender, lover);
+            const params = new URLSearchParams(window.location.search);
+            const s = params.get('from');
+            const r = params.get('to');
+            if(s && r) {
+                senderName = decodeURIComponent(s);
+                receiverName = decodeURIComponent(r);
+                document.getElementById('setup-screen').style.display = 'none';
+                document.getElementById('scanner-screen').style.display = 'flex';
             }
         };
 
-        /* --- 2. SETUP LOGIC --- */
         function generateLink() {
-            const sName = document.getElementById('input-sender').value.trim();
-            const lName = document.getElementById('input-lover').value.trim();
-            
-            if(!sName || !lName) { alert("Please enter both names!"); return; }
-
-            const baseUrl = window.location.href.split('?')[0];
-            const finalUrl = `${baseUrl}?from=${encodeURIComponent(sName)}&to=${encodeURIComponent(lName)}`;
-            
+            const s = document.getElementById('s-input').value.trim();
+            const r = document.getElementById('r-input').value.trim();
+            if(!s || !r) { alert("Please enter both names."); return; }
+            const url = `${window.location.href.split('?')[0]}?from=${encodeURIComponent(s)}&to=${encodeURIComponent(r)}`;
             document.getElementById('share-area').style.display = 'block';
-            document.getElementById('generated-link').innerText = finalUrl;
+            document.getElementById('link-text').innerText = url;
         }
 
         function copyLink() {
-            const linkText = document.getElementById('generated-link').innerText;
-            navigator.clipboard.writeText(linkText).then(() => {
-                alert("Link Copied! Send it to her.");
-            });
+            const txt = document.getElementById('link-text').innerText;
+            navigator.clipboard.writeText(txt).then(() => alert("Copied! Send it to your partner."));
         }
 
-        function manualStart() {
-            const sName = document.getElementById('input-sender').value.trim() || "Kannan";
-            const lName = document.getElementById('input-lover').value.trim() || "Pinju";
-            setupGame(sName, lName);
+        function startPreview() {
+            senderName = document.getElementById('s-input').value.trim() || "Kannan";
+            receiverName = document.getElementById('r-input').value.trim() || "Appu";
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('scanner-screen').style.display = 'flex';
         }
 
-        function setupGame(sender, lover) {
-            // Update Text
-            document.getElementById('game-lover-name').innerText = lover;
-            document.getElementById('final-lover-name').innerText = lover;
-            document.getElementById('final-sender-name').innerText = sender;
+        /* SCANNER */
+        const fpZone = document.getElementById('fp-zone');
+        const statusMsg = document.getElementById('status-msg');
+        const music = document.getElementById('bg-music');
 
-            // Switch Screens
-            setupScreen.style.display = 'none';
-            gameLayer.style.display = 'block';
-
-            // Start Game Loop
-            startGame();
+        function startScan(e) {
+            if(e) e.preventDefault();
+            if(!isMusicPlaying) {
+                music.play().then(() => {
+                    isMusicPlaying = true;
+                    document.getElementById('music-toggle').innerText = "🔊";
+                }).catch(err => {});
+            }
+            fpZone.classList.add('scanning');
+            statusMsg.innerText = "Scanning Biometrics...";
+            statusMsg.style.color = "#ff4b6a";
+            progress = 0;
+            scanInterval = setInterval(() => {
+                progress += 5;
+                if(progress >= 100) { clearInterval(scanInterval); scanSuccess(); }
+            }, 100);
         }
 
-        /* --- 3. GAME LOGIC --- */
-        function startGame() {
-            gameRunning = true;
+        function stopScan() {
+            clearInterval(scanInterval);
+            fpZone.classList.remove('scanning');
+            if(progress < 100) {
+                statusMsg.innerText = "Scan Interrupted. Hold Longer.";
+                statusMsg.style.color = "white";
+            }
+        }
+
+        function scanSuccess() {
+            statusMsg.innerText = `Identity Verified: ${receiverName}`;
+            statusMsg.style.color = "#00f3ff";
+            statusMsg.style.textShadow = "0 0 10px #00f3ff";
+            fpZone.onmousedown = null; fpZone.ontouchstart = null;
+            setTimeout(() => {
+                document.getElementById('scanner-screen').style.display = 'none';
+                showVault();
+            }, 1500);
+        }
+
+        /* VAULT */
+        function showVault() {
+            document.getElementById('vault-screen').style.display = 'flex';
+            renderCard();
+        }
+
+        function renderCard() {
+            const container = document.getElementById('card-box');
+            container.style.animation = 'none';
+            container.offsetHeight; 
+            container.style.animation = 'popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+
+            if(cardIndex < promises.length) {
+                container.innerHTML = `
+                    <div style="font-family:'Orbitron'; color:var(--neon); margin-bottom:20px;">PROMISE 0${cardIndex + 1}</div>
+                    <div class="promise-content">"${promises[cardIndex]}"</div>
+                    <button class="nav-btn" onclick="nextCard()">Next Promise</button>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div style="font-family:'Orbitron'; color:var(--neon); margin-bottom:20px;">FINAL AUTHORIZATION</div>
+                    <div class="promise-content">Do you accept these promises for eternity?</div>
+                    <button class="nav-btn" style="background:#ff4b6a; border-color:#ff4b6a;" onclick="finishContract()">I Accept</button>
+                `;
+            }
+        }
+
+        window.nextCard = function() { cardIndex++; renderCard(); };
+
+        window.finishContract = function() {
+            document.getElementById('vault-screen').style.display = 'none';
+            const finalScreen = document.getElementById('final-screen');
+            finalScreen.style.display = 'flex';
+            finalScreen.style.flexDirection = 'column';
+            finalScreen.style.alignItems = 'center';
+            finalScreen.style.justifyContent = 'center';
             
-            // Audio Unlock Listeners
-            document.body.addEventListener('touchstart', unlockAudio, { passive: false });
-            document.body.addEventListener('click', unlockAudio);
-            
-            // Start Falling Hearts
-            if (spawner) clearInterval(spawner); // Clear any existing
-            spawner = setInterval(createItem, spawnRate);
-        }
+            document.getElementById('final-sender').innerText = senderName;
+            document.getElementById('final-receiver').innerText = receiverName;
+        };
 
-        function unlockAudio() {
-            if (audioUnlocked) return;
-            music.volume = 0;
-            music.play().then(() => {
+        window.toggleAudio = function() {
+            if(music.paused) {
+                music.play();
+                document.getElementById('music-toggle').innerText = "🔊";
+                isMusicPlaying = true;
+            } else {
                 music.pause();
-                music.currentTime = 0;
-                music.volume = 1;
-                audioUnlocked = true;
-            }).catch(e=>{});
-            
-            if(audioUnlocked) {
-                document.body.removeEventListener('touchstart', unlockAudio);
-                document.body.removeEventListener('click', unlockAudio);
+                document.getElementById('music-toggle').innerText = "🔇";
+                isMusicPlaying = false;
             }
-        }
-
-        // --- CONTROLS ---
-        function moveBasket(x) {
-            if(x < 30) x = 30;
-            if(x > window.innerWidth - 30) x = window.innerWidth - 30;
-            basketX = x;
-            basket.style.left = basketX + 'px';
-        }
-        document.addEventListener('mousemove', (e) => { if(gameRunning) moveBasket(e.clientX); });
-        document.addEventListener('touchmove', (e) => { 
-            if(gameRunning) { e.preventDefault(); moveBasket(e.touches[0].clientX); }
-        }, { passive: false });
-
-        // --- SPAWNER ---
-        function createItem() {
-            if (!gameRunning) return;
-
-            const item = document.createElement('div');
-            item.classList.add('falling-item');
-            
-            // 30% Chance of Broken Heart
-            const isBroken = Math.random() < 0.3;
-            if (isBroken) {
-                item.innerHTML = '💔';
-                item.dataset.type = 'broken';
-            } else {
-                item.innerHTML = '❤️';
-                item.dataset.type = 'heart';
-            }
-
-            // Random Position
-            const startX = Math.random() * (window.innerWidth - 50) + 20;
-            item.style.left = startX + 'px';
-            
-            gameLayer.appendChild(item);
-
-            // Falling Animation
-            let itemY = -50;
-            function fall() {
-                if (!gameRunning) { item.remove(); return; }
-                
-                itemY += heartSpeed;
-                item.style.top = itemY + 'px';
-                
-                // Collision Detection
-                const bRect = basket.getBoundingClientRect();
-                const iRect = item.getBoundingClientRect();
-
-                if (iRect.bottom >= bRect.top + 20 && iRect.right >= bRect.left && 
-                    iRect.left <= bRect.right && iRect.top <= bRect.bottom) {
-                    
-                    // Hit!
-                    if (item.dataset.type === 'heart') {
-                        score++;
-                        basket.style.transform = "translateX(-50%) scale(1.2)";
-                    } else {
-                        score--; // Penalty
-                        if(score < 0) score = 0;
-                        gameLayer.classList.add('shake-effect');
-                        setTimeout(()=>gameLayer.classList.remove('shake-effect'), 300);
-                    }
-                    
-                    scoreDisplay.innerText = score + " / " + targetScore;
-                    setTimeout(() => basket.style.transform = "translateX(-50%) scale(1)", 100);
-                    item.remove();
-                    
-                    if (score >= targetScore) endGame();
-                    return;
-                }
-
-                // Missed (out of screen)
-                if (itemY > window.innerHeight) {
-                    item.remove();
-                } else {
-                    requestAnimationFrame(fall);
-                }
-            }
-            requestAnimationFrame(fall);
-        }
-
-        /* --- 4. END GAME --- */
-        function endGame() {
-            gameRunning = false;
-            clearInterval(spawner); // Stop spawning
-            
-            // Clean up existing items
-            const items = document.querySelectorAll('.falling-item');
-            items.forEach(i => i.remove());
-
-            // Switch Screens
-            gameLayer.style.display = 'none';
-            winScreen.style.display = 'flex';
-            
-            // Play Music
-            music.volume = 1;
-            music.play().then(() => {
-                isPlaying = true;
-                updateButtonState();
-            }).catch(e => {
-                console.log("Auto-play blocked, waiting for click");
-                isPlaying = false;
-                updateButtonState();
-            });
-        }
-
-        function toggleMusic() {
-            if (isPlaying) { music.pause(); isPlaying = false; }
-            else { music.play(); isPlaying = true; }
-            updateButtonState();
-        }
-
-        function updateButtonState() {
-            if (isPlaying) {
-                btnText.innerText = "Pause Song";
-                icon.innerText = "⏸";
-                musicBtn.style.background = "#ff4b6a";
-            } else {
-                btnText.innerText = "Play Song";
-                icon.innerText = "▶";
-                musicBtn.style.background = "#4ecdc4";
-            }
-        }
+        };
     </script>
 </body>
 </html>
